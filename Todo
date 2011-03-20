@@ -1,0 +1,423 @@
+
+
+
+
+    · switchable i18n message for easier defaults
+
+        [   'reui.default',
+            [   'reui.somewidget.greeting',
+                'Hello, [_1]!',
+            ],
+            'username',
+        ];
+
+        tries:
+            ['reui.somewidget.greeting', 'username']
+        if in eq out:
+            ['Hello, [_1]!', 'username']
+        if in ne out:
+            return 'Hello, username!';
+
+        language aware:
+
+        [   'reui.default',
+            [   'reui.somewidget.greeting',
+                {   en => 'Hello, [_1]!',
+                    de => 'Hallo, [_1]!',
+                },
+            ],
+            'username',
+        ];
+
+    · ajax view
+
+        my $aj = View::Ajax->new(
+            engine  => 'jQuery',
+            path    => '/jquery.something.js',
+        );
+
+    · skinning
+
+        # http://localhost/skin/dark/default/base.css
+        # http://localhost/skin/dark/default/image/logo.png
+        # http://localhost/skin/dark/default/widget/some_widget/base.css
+        # http://localhost/skin/dark/overview/some_complex_overview_widget/base.css
+
+        my $skinner = View::Skinner->new(
+            include         => {
+                default     => [qw( SomeWidget )],
+                overview    => [qw( SomeComplexOverviewWidget )],
+            },
+            skins           => {
+                dark    => {
+                    class       => 'MyApp::Skin::Dark',
+                    title       => 'Default Dark',
+                    someopt     => 23,
+                },
+            },
+        );
+
+        my $file = $skinner->find(path => 'image/logo.png');
+        my $file = $skinner->find(path => 'base.css', group => 'overview');
+
+        $state->skinning->select('dark');
+        $state->skinning->base($ctx->uri_for_action('skin/serve'));
+        $state->skinning->groups('overview');
+
+        inside Page:
+            $state->skinning->uri_for('logo.png')
+            $state->skinning->uri_for($widget, 'base.css');
+
+    · turn result state class into a trait
+
+    · sections
+
+        my $section = Section->new(
+            title   => 'Test Title',
+            widgets => [
+                SomeContent->new,
+            ],
+        );
+
+    · messages
+
+        my $message = Message->new(
+            title       => 'Changes saved',
+            category    => 'notice',
+            widgets     => [
+                'Some Message',
+            ],
+        );
+
+    · dialogs
+
+        my $dialog = Dialog->new(
+            title       => 'Test Dialog',
+            messages    => [
+                Message->new(
+                    category    => 'notice',
+                    widgets     => [ ... ],
+                ),
+            ],
+            actions     => [
+                Submit->new(name => 'ok'),
+                Submit->new(name => 'cancel'),
+            ],
+            widgets     => [
+                Value->new(name => 'new_name'),
+            ],
+        );
+
+    · control sets
+
+        my $fields = ControlSet->new(
+            name        => 'profile',
+            style       => 'tabular',   # control/set/tabular.base.html
+            error_style => 'list',      # control/set/tabular.error.list.html
+            controls    => [
+                Value->new(name => 'username'),
+                Value->new(name => 'email'),
+            ],
+        );
+
+    · dynamic containers
+
+        my $dyn = Dynamic->new(
+            build => sub {
+                ...
+            },
+        );
+
+    · action sets
+
+        my $sactions = ActionSet->new(
+            name    => 'actions',
+            style   => 'base',
+            actions => [
+                Submit->new(name => 'save'),
+                Submit->new(name => 'delete'),
+                Submit->new(name => 'cancel'),
+            ],
+        );
+
+        $state->on_success($actions->action('save'),   sub { ... });
+        $state->on_success($actions->action('delete'), sub { ... });
+
+    · documentation
+
+        ReUI
+            Manual
+                Intro
+                Intro::Usage
+                Intro::Widgets
+                Intro::I18N
+                Intro::Skins
+                Intro::Forms
+
+    · make base styles configurable in all widgets via style => 'foo'
+
+    · javascript
+
+        # http://localhost/same/resource?__reui.ajax=1
+
+        # content responses will be collected in the event and returned
+        # in the response object
+        my $ajax = $state->fire(Event::AJAX->new(...));
+
+        ReUI
+            Widget
+                Ajax
+                    Update
+                        Interval
+
+    · controls
+        *localised parsing/formatting
+
+        Widget
+            Section
+            Dialog
+            Message
+            Control
+                Action
+                    Set
+                Set
+                Value
+                    Numeric*
+                    DateTime*
+                    Date*
+                    Time*
+                Checkbox
+                Select
+                Group
+                    Radio
+                    Checkbox
+
+
+    · allow i18n library to render widgets
+
+        'Logged in as [render,_1] · [render,_2,text,Logout]'
+
+    · add current uri to request expectations
+
+    · file uploads
+
+    · redirect response via exception during success callbacks that will
+      be collected and if $count > 1 and the targets aren't the same, an
+      error will be thrown.
+
+    · per-widget variables
+
+        my $hash_ref = $state->variables_for($widget);
+
+    · extended distributions
+
+
+        [ReUI-Widget-Account]
+
+            my $login = ReUI::Widget::Account::Login->new(
+                username_arguments => {
+                    label => 'EMail',
+                },
+                password_arguments => {
+                    label => 'Password',
+                },
+                remember_me_arguments => {
+                    show => 1,
+                },
+                forgot_password_arguments => {
+                    uri  => $uri,
+                    text => 'Forgot your password?',
+                },
+                login_action_arguments => {
+                    label => 'Sign In',
+                },
+            );
+            $login->add_constraint('myapp.login.invalid', fun ($result) {
+                $ctx->authenticate({
+                    username => $result->{username},
+                    password => $result->{password},
+                });
+                return $ctx->user_exists;
+            });
+            $state->on_success($login->login_action, fun ($result) {
+                $ctx->res->redirect(...);
+            });
+
+            ReUI
+                Widget
+                    Account
+                        Registration
+                        Login
+                        Logout
+                        Profile
+                        ChangePassword
+                    QuickBox
+                        Account
+                            Status
+                            Login
+
+
+        [ReUI-Widget-Control-Action-Trait-DBIC]
+
+            my $submit = Submit->new(
+                traits    => [qw( DBIC::Create )],
+                resultset => $rs,
+                transform => fun ($result) { ... },
+            );
+
+            ReUI
+                Widget
+                    Control
+                        Action
+                            Trait
+                                DBIC
+                                    Create
+                                    Update
+                                    Delete
+
+
+        [ReUI-Widget-Search]
+
+            my $search = ReUI::Widget::Search::Simple->new(
+                search_action_arguments => {
+                    label => 'Go!',
+                },
+                controls => {
+                    Checkbox->new(name => 'case_sensitive'),
+                },
+            );
+            $state->on_success($search->search_action, fun ($result) {
+                $_->variables_for($list_widget)->{query} = $result->{query};
+            });
+
+            ReUI
+                Widget
+                    Search
+                        Simple
+                        Advanced
+                    QuickBox
+                        Search
+
+
+        [ReUI-Widget-Comment]
+
+            ReUI
+                Widget
+                    Comment
+                        Tree
+                        Post
+                    Dialog
+                        Comment
+                            Create
+                            Edit
+                            Delete
+
+
+        [ReUI-Widget-Content-Markdown]
+
+            Markdown->new(file => ...);
+            my $mkd = Markdown->new(
+                markdown        => $body,
+                link_callbacks  => {
+                    dist => fun ($uri, $name) {
+                        return URI->new("http://search.cpan.org/dist/$name");
+                    },
+                    _    => fun ($uri) {
+                        return URI->new($uri);
+                    },
+                },
+            );
+
+            ReUI
+                Widget
+                    Content
+                        Markdown
+
+
+        [ReUI-Widget-Table]
+
+            ReUI
+                Widget
+                    Table
+                        CRUD
+                        Row
+                            Head
+                            Body
+                            Foot
+
+
+        [ReUI-Reflector-DBIC]
+
+            ReUI
+                Reflector
+                    DBIC
+                        Form
+                            Create
+                            Update
+                        Table
+
+
+        [ReUI-Widget-Pager]
+
+            my $rs = get_rs();
+            my $pager = ReUI::Widget::Pager->new(
+                name        => 'some_pager',
+                total_pages => $total,
+            );
+            my $page = $pager->page_in($state);
+            my $paged = $rs->page($page);
+            $page->add(...) for $paged->all;
+
+            ReUI
+                Widget
+                    Pager
+
+
+        [ReUI-Navigation]
+
+            my $model = ReUI::Model::Navigation->new(
+                nodes => [
+                    {   name    => 'home',
+                        uri     => sub { ... },
+                    },
+                    {   name    => 'archive',
+                        nodes   => [
+                            {   name    => 2009,
+                                uri     => sub { ... },
+                            },
+                        ],
+                    },
+                ],
+            );
+            my $trail = $model->trail('archive');
+            $trail->into(2009);
+            $trail->into({ label => 'Dynamic Part', uri => $uri });
+            $trail->current;
+            $trail->root;
+            $page->add(R:W:Navigation::Trail->new(
+                trail   => $trail,
+            ));
+            $page->add(R:W:Navigation::SingleLevel->new(
+                model   => $trail->current->parent,
+            ));
+            $page->add(R:W:Navigation::Tree->new(
+                trail   => $trail,
+                levels  => 5,           # topmost, -5 for bottom
+                expand  => 'trail',     # trail, current, all, none, fun ($node) { 1 || 0 }
+            ));
+
+            ReUI
+                Model
+                    Navigation
+                        Trail
+                Widget
+                    Navigation
+                        SingleLevel
+                        Tree
+                        Trail
+
+
+
+
+
+
