@@ -93,7 +93,6 @@ method stylesheet_link_populator ($uri, $state) {
 }
 
 with qw(
-    ReUI::Role::Hint::Provider::Core
     ReUI::Role::ElementClasses
 );
 

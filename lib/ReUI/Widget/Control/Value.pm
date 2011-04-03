@@ -62,7 +62,6 @@ with qw(
     ReUI::Widget::Control::API
     ReUI::Widget::Control::API::TypeConstrained
     ReUI::Widget::Control::API::Require
-    ReUI::Role::Hint::Provider::Core
     ReUI::Role::ElementClasses
 );
 

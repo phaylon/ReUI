@@ -45,7 +45,6 @@ method failure ($state, $global_errors, $control_errors) {
 with qw(
     ReUI::Widget::Control::API
     ReUI::Role::Identification::Internal
-    ReUI::Role::Hint::Provider::Core
 );
 
 before store_valid_value => method ($event, $value) {

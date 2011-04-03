@@ -130,7 +130,6 @@ around compile => fun ($orig, $self, $state) {
 };
 
 with qw(
-    ReUI::Role::Hint::Provider::Core
     ReUI::Role::Identification::Internal
     ReUI::Role::ElementClasses
     ReUI::Widget::Container::API::Namespaced
