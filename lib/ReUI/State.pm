@@ -5,8 +5,10 @@ use strictures 1;
 package ReUI::State;
 use Moose;
 
-use ReUI::Traits        qw( Lazy RelatedClass Array Hash );
-use ReUI::Types         qw( Request ArrayRef HashRef Namespace Language );
+use ReUI::Traits        qw( Lazy RelatedClass Array Hash Code );
+use ReUI::Types         qw(
+    Request ArrayRef HashRef Namespace Language Str CodeRef
+);
 use Carp                qw( confess );
 use Params::Classify    qw( is_blessed is_ref is_string );
 use Moose::Util         qw( does_role );
@@ -349,11 +351,11 @@ L</variables>.
 
 =cut
 
-method resolve ($value) {
+method resolve ($value, @args) {
     return $value
         unless is_ref $value, 'CODE';
     local *_ = $self->variables;
-    return scalar $value->($self);
+    return scalar $value->(@args);
 }
 
 

@@ -71,4 +71,63 @@ test_processing('lazy',
     $default_test,
 );
 
+my $skin_uri_cb  = sub { join '/', 'http://example.com/skin', @_ };
+my $skin_css     = 'http://example.com/skin/base/main.css';
+my $skinned_test = test_markup(fun ($page) {
+    $page->into('/html', fun ($doc) {
+        $doc->into('//head', fun ($head) {
+            $head->into('//link',
+                fun ($link) {
+                    note('skin stylesheet');
+                    $link->attr_is(href => $skin_css);
+                    $link->attr_is(rel  => 'stylesheet');
+                },
+                fun ($link) {
+                    note('user stylesheet');
+                    $link->attr_is(href => 'http://example.com/main.css');
+                    $link->attr_is(rel  => 'stylesheet');
+                },
+            );
+        });
+        $doc->into('//body', fun ($body) {
+            $body->attr_is(id => 'pageid');
+            $body->attr_contains(class => qw( foo bar ));
+            $body->contains_test_value('page-content');
+        });
+    });
+});
+
+test_processing('skinned',
+    {   widget => Page->new(
+            title               => 'Test Title',
+            id                  => 'pageid',
+            classes             => [qw( foo bar )],
+            stylesheet_uris     => [ URI->new('http://example.com/main.css') ],
+            widgets             => [ $content_test_value ],
+            skin                => 'base',
+            skin_uri_callback   => $skin_uri_cb,
+        ),
+    },
+    $skinned_test,
+);
+
+test_processing('skinned lazy',
+    {   widget => Page->new(
+            id                  => 'pageid',
+            classes             => [qw( foo bar )],
+            title               => sub { $_{title} },
+            stylesheet_uris     => sub { $_{stylesheets} },
+            widgets             => [ $content_test_value ],
+            skin                => sub { $_{skinname} },
+            skin_uri_callback   => $skin_uri_cb,
+        ),
+        variables => {
+            title       => 'Test Title',
+            stylesheets => [ URI->new('http://example.com/main.css') ],
+            skinname    => 'base',
+        },
+    },
+    $skinned_test,
+);
+
 done_testing;

@@ -30,6 +30,9 @@ use MooseX::Types -declare => [qw(
     IdentifierList
     I18N
     Language
+    Skin
+    SkinMap
+    _SkinProto
 )];
 
 my $rxNamespaceStr = qr{
@@ -43,6 +46,31 @@ my $rxNamespaceStr = qr{
     )?
     \Z
 }x;
+
+subtype _SkinProto,
+    as HashRef,
+    where { defined $_->{class} };
+
+subtype Skin, as role_type('ReUI::Skin::API');
+
+coerce Skin,
+    from _SkinProto, via {
+        my %args  = %$_;
+        my $class = delete $args{class};
+        Class::MOP::load_class($class);
+        return $class->new(%args);
+    };
+
+subtype SkinMap,
+    as HashRef[ Skin ];
+
+coerce SkinMap,
+    from HashRef[ _SkinProto | Skin ], via {
+        my $map = $_;
+        +{ map {
+            ($_, Skin->coerce($map->{ $_ }));
+        } keys %$map };
+    };
 
 subtype Language, as Str, where { m/^ [a-z]{2} (?: _ [a-z]{2} )? $/ix };
 

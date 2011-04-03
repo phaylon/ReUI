@@ -5,8 +5,10 @@ use strictures 1;
 package ReUI::Widget::Page;
 use Moose;
 
-use ReUI::Types     qw( NonEmptySimpleStr CodeRef Uri ArrayRef I18N );
 use ReUI::Traits    qw( LazyRequire Lazy Resolvable );
+use ReUI::Types     qw(
+    NonEmptySimpleStr CodeRef Uri ArrayRef I18N Maybe Str
+);
 
 use syntax qw( function method );
 use namespace::autoclean;
@@ -19,6 +21,7 @@ has title => (
     isa         => I18N,
 );
 
+
 has javascript_uris => (
     traits      => [ Lazy, Resolvable ],
     is          => 'ro',
@@ -28,6 +31,7 @@ has javascript_uris => (
 
 method _build_javascript_uris { [] }
 
+
 has stylesheet_uris => (
     traits      => [ Lazy, Resolvable ],
     is          => 'ro',
@@ -36,6 +40,27 @@ has stylesheet_uris => (
 );
 
 method _build_stylesheet_uris { [] }
+
+
+has skin => (
+    traits      => [ Resolvable ],
+    is          => 'ro',
+    isa         => Maybe[ Str ],
+);
+
+
+has skin_uri_callback => (
+    traits      => [ LazyRequire ],
+    is          => 'ro',
+    isa         => CodeRef,
+);
+
+method has_skin_uri_callback { defined $self->skin_uri_callback }
+
+method uri_for_skin ($state, @args) {
+    return $state->resolve($self->skin_uri_callback, @args);
+}
+
 
 around compile => fun ($orig, $self, $state) {
     my $title = $self->resolve_title($state);
@@ -78,9 +103,17 @@ method link_populators ($state) {
 }
 
 method stylesheet_link_populators ($state) {
+    my @uris = $self->resolve_stylesheet_uris($state);
+    if (my $name = $self->resolve_skin($state)) {
+        my $skin = $state->skin($name)
+            or confess qq{Unknown skin '$name'};
+        unshift @uris, map {
+            $self->uri_for_skin($state, $name, $_);
+        } $skin->per_page_stylesheets;
+    }
     return map {
         $self->stylesheet_link_populator($_, $state);
-    } $self->resolve_stylesheet_uris($state);
+    } @uris;
 }
 
 method stylesheet_link_populator ($uri, $state) {

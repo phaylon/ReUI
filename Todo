@@ -36,37 +36,7 @@
             path    => '/jquery.something.js',
         );
 
-    · skinning
-
-        # http://localhost/skin/dark/default/base.css
-        # http://localhost/skin/dark/default/image/logo.png
-        # http://localhost/skin/dark/default/widget/some_widget/base.css
-        # http://localhost/skin/dark/overview/some_complex_overview_widget/base.css
-
-        my $skinner = View::Skinner->new(
-            include         => {
-                default     => [qw( SomeWidget )],
-                overview    => [qw( SomeComplexOverviewWidget )],
-            },
-            skins           => {
-                dark    => {
-                    class       => 'MyApp::Skin::Dark',
-                    title       => 'Default Dark',
-                    someopt     => 23,
-                },
-            },
-        );
-
-        my $file = $skinner->find(path => 'image/logo.png');
-        my $file = $skinner->find(path => 'base.css', group => 'overview');
-
-        $state->skinning->select('dark');
-        $state->skinning->base($ctx->uri_for_action('skin/serve'));
-        $state->skinning->groups('overview');
-
-        inside Page:
-            $state->skinning->uri_for('logo.png')
-            $state->skinning->uri_for($widget, 'base.css');
+    · refactor type system, grown too organically
 
     · turn result state class into a trait
 

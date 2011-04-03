@@ -51,13 +51,14 @@ method contains_test_value ($id) {
 }
 
 method into ($path, @tests) {
-    my $idx = 1;
+    my $idx    = 1;
+    my $single = (@tests == 1);
     $self->ok($path, method {
         if (@tests) {
             my $test = shift @tests;
             grouped(
                 sprintf('%s %s',
-                    num2en_ordinal($idx++),
+                    $single ? 'single' : num2en_ordinal($idx++),
                     $path,
                 ),
                 sub { $self->$test },

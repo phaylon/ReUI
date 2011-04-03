@@ -33,7 +33,13 @@ use Sub::Exporter -setup => {
 };
 
 my $View = View->new(
-    search_paths => ["$Bin/../share"],
+    search_paths    => ["$Bin/../share"],
+    skins           => {
+        base    => {
+            class   => 'ReUI::Skin::Base',
+            title   => 'Base Skin',
+        },
+    },
 );
 
 sub VIEW () { $View }

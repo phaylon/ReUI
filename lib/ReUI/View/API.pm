@@ -10,6 +10,7 @@ use namespace::autoclean;
 
 with qw(
     ReUI::View::Provider::API
+    ReUI::View::Skinner::API
 );
 
 1;
