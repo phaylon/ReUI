@@ -6,7 +6,7 @@ package ReUI::View::Provider::Auto;
 use Moose;
 
 use ReUI::Types     qw( DirList );
-use ReUI::Util      qw( class_to_path );
+use ReUI::Util      qw( file_by_object );
 use ReUI::Traits    qw( Lazy Array );
 use Moose::Util     qw( does_role );
 use HTML::Zoom;
@@ -79,34 +79,14 @@ method markup_for ($object, $name) {
     File = $object->locate_markup_file( $object, $part );
 
 Returns a file object for the closest markup file for the passed C<$object>
-and corresponding to the C<$part>. The details are outlined in the
+and corresponding to the C<$part> string. The details are outlined in the
 L</Markup Discovery> section.
 
 =cut
 
-method locate_markup_file ($object, $name) {
-    my $filename = $name . '.html';
-    my @classes = grep {
-        not $_->meta->is_anon_class;
-    } $object->meta->linearized_isa;
-    my @paths = $self->search_paths;
-    push @paths, $object->additional_search_paths
-        if does_role $object, 'ReUI::Role::Hint::Provider';
-    my %seen;
-    while (my $class = shift @classes) {
-        unshift @classes,
-            grep { not $seen{ $_ }++ }
-                $class->meta->calculate_all_roles
-            if  $name ne DEFAULT_MARKUP
-            and $class->meta->isa('Moose::Meta::Class');
-        my $path = class_to_path($class);
-        for my $root ($self->search_paths) {
-            my $full = $root->file($path, $filename);
-            return $full
-                if -e $full;
-        }
-    }
-    return undef;
+method locate_markup_file ($object, $partname) {
+    my $filename = $partname . '.html';
+    return file_by_object($object, $filename, [$self->search_paths]);
 }
 
 

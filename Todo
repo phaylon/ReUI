@@ -36,6 +36,8 @@
             path    => '/jquery.something.js',
         );
 
+    · remove provider hinting since it's not necessary with module_file
+
     · skinning
 
         # http://localhost/skin/dark/default/base.css

@@ -33,7 +33,7 @@ use Sub::Exporter -setup => {
 };
 
 my $View = View->new(
-    search_paths => ["$Bin/../share/templates"],
+    search_paths => ["$Bin/../share"],
 );
 
 sub VIEW () { $View }

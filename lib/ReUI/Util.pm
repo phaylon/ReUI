@@ -5,6 +5,10 @@ use strictures 1;
 package ReUI::Util;
 
 use Class::MOP;
+use Scalar::Util    qw( blessed );
+use Carp            qw( confess );
+use File::ShareDir  qw( module_file );
+use Try::Tiny;
 
 use syntax qw( function );
 use namespace::clean;
@@ -17,6 +21,7 @@ use Sub::Exporter -setup => {
         deflatten_hashref
         flatten_hashref
         filter_flat_hashref
+        file_by_object
         lineup
     )],
 };
@@ -74,6 +79,30 @@ fun deflatten_hashref ($data) {
         %done,
     };
     return $rec;
+}
+
+fun file_by_object ($object, $file, $paths) {
+    $paths = []
+        unless defined $paths;
+    my @classes = grep {
+        not $_->meta->is_anon_class;
+    } $object->meta->linearized_isa;
+    my %seen;
+    while (my $class = shift @classes) {
+        unshift @classes,
+                grep { not $seen{ $_ }++; } $class->meta->calculate_all_roles
+            if $class->meta->isa('Moose::Meta::Class');
+        (my $class_path = $class) =~ s/::/-/g;
+        for my $root (@$paths) {
+            my $full = $root->file('module', $class_path, $file);
+            return $full
+                if -e $full;
+        }
+        if (my $installed = try { module_file($class, $file) }) {
+            return $installed;
+        }
+    }
+    return undef;
 }
 
 fun class_to_path ($class) {
