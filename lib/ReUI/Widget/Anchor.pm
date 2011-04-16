@@ -25,7 +25,7 @@ with qw(
 );
 
 
-around anchor_attributes => ($orig, $self, $state) {
+around anchor_attributes => fun ($orig, $self, $state) {
     $self->$orig($state),
     name => $self->resolve_name($state),
 };

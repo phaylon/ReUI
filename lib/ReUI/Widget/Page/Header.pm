@@ -3,7 +3,7 @@ use strictures 1;
 package ReUI::Widget::Page::Header;
 use Moose;
 
-use ReUI::Types     qw( Renderable Uri Maybe Does );
+use ReUI::Types     qw( Renderable Uri Maybe Does Bool Undef );
 use ReUI::Traits    qw( Resolvable LazyRequire Lazy RelatedClass );
 use ReUI::Constants qw( :skinfiles );
 
@@ -49,7 +49,7 @@ method _build_logo_link_class { 'ReUI::Widget::Page::Header::Logo::Link' }
 
 has logo => (
     traits      => [ Lazy ],
-    is          => 'ro',
+    is          => 'rw',
     isa         => Maybe[ Does['ReUI::Widget::API'] ],
     clearer     => 'reset_logo',
 );
@@ -70,12 +70,43 @@ method _build_logo {
 }
 
 
+has show_logo => (
+    traits      => [ Lazy, Resolvable ],
+    is          => 'rw',
+    isa         => Bool | Undef,
+);
+
+method _build_show_logo { 1 }
+
+
+has show_content => (
+    traits      => [ Lazy, Resolvable ],
+    is          => 'rw',
+    isa         => Bool | Undef,
+);
+
+method _build_show_content { 1 }
+
+
 method compile ($state) {
     return $state->markup_for($self)
         ->select('.page-header-content')
-        ->replace($state->render($self->content))
+        ->replace(
+            $self->resolve_show_content($state)
+                ? $state->render($self->content)
+                : [],
+        )
         ->select('.page-header-logo')
-        ->replace($self->logo || []);
+        ->replace(
+            $self->resolve_show_logo($state)
+                ? do {
+                    my $logo = $self->logo;
+                    $logo
+                        ? $state->render($logo)
+                        : [];
+                }
+                : [],
+        );
 }
 
 
