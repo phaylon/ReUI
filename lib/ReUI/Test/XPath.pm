@@ -37,10 +37,15 @@ method attr_doesnt_contain ($attr, @values) {
 
 method attr_contains ($attr, @values) {
     my %value = map { ($_, 1) } split m{ }, $self->attr_value($attr);
-    grouped("$attr attribute contents include", sub {
-        Test::More::ok($value{ $_ }, "'$_'")
-            for @values;
-    });
+    grouped(
+        [ "$attr attribute contents include",
+          "$attr attribute contents",
+        ],
+        sub {
+            Test::More::ok($value{ $_ }, "'$_'")
+                for @values;
+        },
+    );
 }
 
 method contains_test_value ($id) {

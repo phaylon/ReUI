@@ -4,21 +4,51 @@ use strictures 1;
 
 package ReUI::Constants;
 
-my (%Constant, %I18N);
+use Params::Classify qw( is_ref );
+
+use syntax qw( function );
+use namespace::clean;
+
+my (%Constant, %I18N, %SkinFile);
 BEGIN {
-    %I18N = ( map { ('I18N_' . $_->[0], $_->[1]) }
+    my $prepare = fun ($prefix, @to) {
+        return map {
+            (   join('_', $prefix, $_->[0]),
+                $_->[1],
+            );
+        } @to;
+    };
+    %I18N = $prepare->('I18N',
         [ VALUE_INVALID     => 'reui.control.invalid' ],
         [ VALUE_MISSING     => 'reui.control.missing' ],
         [ PASSWORD_MISMATCH => 'reui.control.password.mismatch' ],
     );
-    %Constant = (%I18N);
+    %SkinFile = $prepare->('SKINFILE',
+        [ PAGE_HEADER_LOGO  => \[qw( page header logo.png )] ],
+    );
+    %Constant = (%I18N, %SkinFile);
 };
 
-use constant \%Constant;
+#use constant \%Constant;
+
+use constant ();
+BEGIN {
+    for my $name (keys %Constant) {
+        my $value = $Constant{ $name };
+        constant->import(
+            $name,
+            ( is_ref($value, 'SCALAR') and is_ref($$value, 'ARRAY') )
+                ? @{ $$value }
+                : $value
+        );
+    }
+}
+
 use Sub::Exporter -setup => {
     exports => [keys %Constant],
     groups  => {
-        i18n    => [keys %I18N],
+        i18n        => [keys %I18N],
+        skinfiles   => [keys %SkinFile],
     },
 };
 

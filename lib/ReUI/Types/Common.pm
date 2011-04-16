@@ -33,6 +33,7 @@ use MooseX::Types -declare => [qw(
     Skin
     SkinMap
     _SkinProto
+    Renderable
 )];
 
 my $rxNamespaceStr = qr{
@@ -123,6 +124,9 @@ coerce DirList,
     from Dir, via {
         [ $_ ];
     };
+
+subtype Renderable,
+    as Str | I18N | Does['ReUI::Widget::API'];
 
 1;
 

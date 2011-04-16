@@ -42,26 +42,6 @@ has stylesheet_uris => (
 method _build_stylesheet_uris { [] }
 
 
-has skin => (
-    traits      => [ Resolvable ],
-    is          => 'ro',
-    isa         => Maybe[ Str ],
-);
-
-
-has skin_uri_callback => (
-    traits      => [ LazyRequire ],
-    is          => 'ro',
-    isa         => CodeRef,
-);
-
-method has_skin_uri_callback { defined $self->skin_uri_callback }
-
-method uri_for_skin ($state, @args) {
-    return $state->resolve($self->skin_uri_callback, @args);
-}
-
-
 around compile => fun ($orig, $self, $state) {
     my $title = $self->resolve_title($state);
     return $state->markup_for($self)
@@ -104,11 +84,11 @@ method link_populators ($state) {
 
 method stylesheet_link_populators ($state) {
     my @uris = $self->resolve_stylesheet_uris($state);
-    if (my $name = $self->resolve_skin($state)) {
+    if (my $name = $state->current_skin) {
         my $skin = $state->skin($name)
             or confess qq{Unknown skin '$name'};
         unshift @uris, map {
-            $self->uri_for_skin($state, $name, $_);
+            $state->uri_for_skin($name, $_);
         } $skin->per_page_stylesheets;
     }
     return map {

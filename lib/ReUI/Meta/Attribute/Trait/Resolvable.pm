@@ -59,8 +59,14 @@ after install_accessors => method {
             $value = $state->resolve($value);
             confess q{Cannot resolve value to code reference}
                 if is_ref $value, 'CODE';
-            $attr->original_type_constraint->assert_valid($value)
-                if $attr->has_original_type_constraint;
+            if (my $tc = $attr->original_type_constraint) {
+                if ($attr->should_coerce) {
+                    $value = $tc->assert_coerce($value);
+                }
+                else {
+                    $tc->assert_valid($value);
+                }
+            }
             return $attr->as_list
                 ? @$value
                 : $value;

@@ -5,6 +5,7 @@ use Moose;
 
 use ReUI::Traits qw( Lazy Hash Array );
 use ReUI::Types  qw( SkinMap DirList );
+use ReUI::Util   qw( file_by_object );
 use Carp         qw( confess );
 
 use syntax qw( function method );

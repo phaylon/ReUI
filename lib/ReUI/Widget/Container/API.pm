@@ -14,6 +14,8 @@ requires qw(
     is_empty
     widget
     compile
+    compile_widgets
+    compile_widget
 );
 
 1;

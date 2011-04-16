@@ -5,7 +5,7 @@ use strictures 1;
 package ReUI::State;
 use Moose;
 
-use ReUI::Traits        qw( Lazy RelatedClass Array Hash Code );
+use ReUI::Traits        qw( Lazy LazyRequire RelatedClass Array Hash Code );
 use ReUI::Types         qw(
     Request ArrayRef HashRef Namespace Language Str CodeRef
 );
@@ -310,6 +310,25 @@ has i18n => (
 method _build_i18n {
     return $self->view->i18n_for($self->language);
 }
+
+
+has skin_uri_callback => (
+    traits      => [ LazyRequire ],
+    is          => 'ro',
+    isa         => CodeRef,
+);
+
+method has_skin_uri_callback { defined $self->skin_uri_callback }
+
+method uri_for_skin (@args) {
+    return $self->resolve($self->skin_uri_callback, @args);
+}
+
+
+has current_skin => (
+    is          => 'rw',
+    isa         => Str,
+);
 
 
 =method with_language

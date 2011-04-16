@@ -67,16 +67,17 @@ fun test_require_call ($title, $count) {
 }
 
 fun grouped ($title, $code) {
+    (my $descr, $title) = ref($title) ? @$title : ($title, $title);
     if ($ENV{REUI_TEST_FLAT}) {
         Test::More::note(sprintf '%s%s',
             $LEVEL ? sprintf(' %s ', '*' x $LEVEL) : '',
-            $title,
+            $descr,
         );
         local $LEVEL = $LEVEL + 1;
         $code->();
     }
     else {
-        Test::More::note($title);
+        Test::More::note($descr);
         Test::More::subtest($title, sub {
             $code->();
             Test::More::done_testing;
@@ -104,6 +105,7 @@ fun test_processing ($title, $args, @tests) {
         };
         my $state = $View->prepare(
             request => $request,
+            %{ $args->{prepare} || {} },
         );
         $widget = $state->$widget
             if ref $widget eq 'CODE';

@@ -13,6 +13,7 @@ __PACKAGE__->provide_types_from(qw(
     MooseX::Types::URI
     MooseX::Types::Path::Class
     MooseX::Types::Meta
+    MooseX::Types::Structured
 ));
 
 1;

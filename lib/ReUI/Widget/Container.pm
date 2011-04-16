@@ -29,12 +29,16 @@ has widgets => (
 method _build_widgets { [] }
 
 method compile ($state) {
+    return $self->compile_widgets($state, $self->widgets);
+}
+
+method compile_widgets ($state, @widgets) {
     return HTML::Zoom->from_events([ map {
-        (@{ $self->compile_widget($_, $state)->to_events })
+        (@{ $self->compile_widget($state, $_)->to_events })
     } $self->widgets ]);
 }
 
-method compile_widget ($widget, $state) {
+method compile_widget ($state, $widget) {
     return $state->render($widget);
 }
 
