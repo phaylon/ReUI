@@ -3,39 +3,39 @@ use strictures 1;
 package ReUI::Meta::Attribute::Trait::Prototyped;
 use Moose::Role;
 
-use MooseX::Types::Moose    qw( ArrayRef HashRef Str );
+use MooseX::Types::Moose    qw( ArrayRef HashRef Str Maybe );
 use Params::Classify        qw( is_ref );
 use Carp                    qw( confess );
+use HTML::Zoom;
 
 use syntax qw( function method );
 use namespace::autoclean;
 
-has make_via => (
-    is          => 'ro',
-    isa         => Str,
-    required    => 1,
-);
+has make_via        => (is => 'ro', isa => Str, required => 1);
+has proto_clearer   => (is => 'ro', isa => Str, required => 1);
+has proto_getter    => (is => 'ro', isa => Str, required => 1);
+has proto_inflate   => (is => 'ro', isa => Str, required => 1);
+has compile_all     => (is => 'ro', isa => Maybe[ Str ], required => 1);
+has compile_single  => (is => 'ro', isa => Maybe[ Str ], required => 1);
 
 before _process_options => method ($class: $name, $options) {
     %$options = (
-        init_arg => undef,
+        init_arg        => undef,
+        proto_clearer   => "_clear_prototyped_${name}",
+        proto_getter    => "_prototyped_${name}",
+        proto_inflate   => "_inflate_${name}",
+        compile_all     => "compile_${name}",
+        compile_single  => "compile_${name}_widget",
         %$options,
     );
 };
 
-after install_accessors => method {
+method _install_prototype_attribute {
     my $name    = $self->name;
     my $class   = $self->associated_class;
-    my $clearer = "_clear_prototyped_${name}";
-    my $proto   = "_prototyped_${name}";
-    my $tc      = $self->type_constraint;
-    my $inflate = "_inflate_${name}";
-    my $maker   = $self->make_via;
-    my $com_all = "compile_${name}";
-    my $com_one = "${com_all}_widget";
-    confess qq{Only ArrayRef types are supported in $self}
-        unless $tc->is_a_type_of(ArrayRef);
-    my $param   = $tc->type_parameter
+    my $proto   = $self->proto_getter;
+    my $clearer = $self->proto_clearer;
+    my $param   = $self->type_constraint->type_parameter
         or confess qq{Unparameterized type on $name is not supported};
     $class->add_attribute("prototyped_$name",
         traits      => [qw( Array )],
@@ -50,6 +50,12 @@ after install_accessors => method {
         },
     );
     $class->add_method("_build_prototyped_$name", method { [] });
+}
+
+method _install_inflate_method {
+    my $class   = $self->associated_class;
+    my $inflate = $self->proto_inflate;
+    my $maker   = $self->make_via;
     $class->add_method($inflate, method (@values) {
         return map {
             is_ref($_, 'HASH')
@@ -57,11 +63,31 @@ after install_accessors => method {
                 : $_
         } @values;
     });
+}
+
+method _install_real_builder_method {
+    my $name    = $self->name;
+    my $class   = $self->associated_class;
+    my $inflate = $self->proto_inflate;
+    my $proto   = $self->proto_getter;
+    my $clearer = $self->proto_clearer;
     $class->add_method("_build_$name", method {
         my @objects = $self->$inflate($self->$proto);
         $self->$clearer;
         return \@objects;
     });
+}
+
+method _install_compilation_methods {
+    my $name    = $self->name;
+    my $class   = $self->associated_class;
+    my $com_one = $self->compile_single;
+    my $com_all = $self->compile_all;
+    return unless defined $com_one;
+    $class->add_method($com_one, method ($state, $widget) {
+        return $state->render($widget);
+    });
+    return unless defined $com_all;
     $class->add_method($com_all, method ($state) {
         my $ls = $self->meta
             ->find_attribute_by_name($name)
@@ -70,9 +96,19 @@ after install_accessors => method {
             (@{ $self->$com_one($state, $_)->to_events });
         } @$ls ]);
     });
-    $class->add_method($com_one, method ($state, $widget) {
-        return $state->render($widget);
-    });
+}
+
+after install_accessors => method {
+    my $name    = $self->name;
+    my $tc      = $self->type_constraint;
+    confess qq{Only ArrayRef types are supported in $self}
+        unless $tc->is_a_type_of(ArrayRef);
+    my $param   = $tc->type_parameter
+        or confess qq{Unparameterized type on $name is not supported};
+    $self->_install_prototype_attribute;
+    $self->_install_inflate_method;
+    $self->_install_real_builder_method;
+    $self->_install_compilation_methods;
 };
 
 with qw(

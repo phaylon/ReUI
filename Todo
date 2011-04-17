@@ -104,21 +104,6 @@
             },
         );
 
-    · action sets
-
-        my $sactions = ActionSet->new(
-            name    => 'actions',
-            style   => 'base',
-            actions => [
-                Submit->new(name => 'save'),
-                Submit->new(name => 'delete'),
-                Submit->new(name => 'cancel'),
-            ],
-        );
-
-        $state->on_success($actions->action('save'),   sub { ... });
-        $state->on_success($actions->action('delete'), sub { ... });
-
     · documentation
 
         ReUI

@@ -18,6 +18,11 @@ has label => (
     is          => 'ro',
 );
 
+method _build_label { join ' ', map ucfirst, map lc, split m{_}, $self->name }
+
+method has_label { defined $self->label }
+
+
 method validation_state_in ($state) {
     return(
         ( $state->isa('ReUI::State::Result') and $state->has_result )
@@ -30,10 +35,6 @@ method validation_state_in ($state) {
           : undef,
     );
 }
-
-method _build_label { join ' ', map ucfirst, map lc, split m{_}, $self->name }
-
-method has_label { defined $self->label }
 
 method compile ($state) {
     return $self->compile_with_value($state, $self->find_value($state));

@@ -6,15 +6,16 @@ use Moose::Role;
 use syntax qw( function method );
 use namespace::autoclean;
 
-with qw( ReUI::Role::ElementName );
+requires qw(
+    propagate_event
+);
 
-for my $wrapped (qw( compile propagate_event )) {
-    around "$wrapped" => fun ($orig, $self, $proto) {
-        if ($self->has_name) {
-            $proto = $proto->descend($self->name);
-        }
-        return $self->$orig($proto);
-    };
-}
+around propagate_event => fun ($orig, $self, $event) {
+    return $self->$orig($event->descend($self->name));
+};
+
+with qw(
+    ReUI::Widget::API::Namespaced
+);
 
 1;

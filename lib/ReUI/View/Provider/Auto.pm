@@ -66,7 +66,9 @@ markup to load.
 =cut
 
 method markup_for ($object, $name) {
-    $name = DEFAULT_MARKUP
+    $name = does_role($object, 'ReUI::Widget::API::Styled')
+            ? $object->style
+            : DEFAULT_MARKUP
         unless defined $name;
     my $file = $self->locate_markup_file($object, $name)
         or confess "No markup file found for $object";
