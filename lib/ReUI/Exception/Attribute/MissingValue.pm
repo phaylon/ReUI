@@ -9,7 +9,10 @@ use ReUI::Types qw( Str );
 use aliased 'Role::HasPayload::Meta::Attribute::Payload';
 
 use syntax qw( function method );
-use namespace::autoclean;
+use namespace::clean;
+use overload
+    q{""}    => sub { (shift)->message },
+    fallback => 1;
 
 with qw( ReUI::Exception::Attribute::API );
 

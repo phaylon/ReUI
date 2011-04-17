@@ -17,6 +17,7 @@ BEGIN {
         Resolvable
         Lazy
         LazyRequire
+        Prototyped
     );
     @AllTraits     = (@BuiltinTraits, @ReTraits);
 };

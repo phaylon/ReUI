@@ -1,5 +1,12 @@
 
 
+    · add resolvable on_success/on_failure callback attributes
+      to action objects.
+
+    · clean up namespacing, with a separate widget role for namespace
+      descension. specialized objects will react to this role.
+
+    · allow optional namespacing of action sets.
 
     · switchable i18n message for easier defaults
 

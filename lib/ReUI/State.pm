@@ -416,6 +416,15 @@ method render ($value) {
 }
 
 
+method render_widgets (@widgets) {
+    return HTML::Zoom->from_events([
+        map {
+            (@{ $self->render_widget($_)->to_events });
+        } @widgets,
+    ]);
+}
+
+
 =method render_widget
 
     HTML::Zoom = $object->render_widget( $widget );

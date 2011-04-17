@@ -3,7 +3,7 @@ use strictures 1;
 package ReUI::Widget::List;
 use Moose;
 
-use ReUI::Traits        qw( Array Lazy RelatedClass );
+use ReUI::Traits        qw( Array Lazy RelatedClass Prototyped );
 use ReUI::Types         qw( ArrayRef Bool HashRef );
 use Params::Classify    qw( is_ref );
 
@@ -23,9 +23,9 @@ method _build_item_class { Item }
 
 
 has items => (
-    traits      => [ Array, Lazy ],
+    traits      => [ Array, Prototyped ],
     isa         => ArrayRef[ Item ],
-    init_arg    => undef,
+    make_via    => 'make_item',
     handles     => {
         items           => 'elements',
         has_items       => 'count',
@@ -33,25 +33,6 @@ has items => (
         item            => 'accessor',
     },
 );
-
-method _build_items {
-    my @items = $self->_inflate_items($self->_item_prototypes);
-    $self->_clear_item_prototypes;
-    return [@items];
-}
-
-
-has item_prototypes => (
-    traits      => [ Array, Lazy ],
-    isa         => ArrayRef[ HashRef | Item ],
-    init_arg    => 'items',
-    clearer     => '_clear_item_prototypes',
-    handles     => {
-        _item_prototypes    => 'elements',
-    },
-);
-
-method _build_item_prototypes { [] }
 
 
 has is_ordered => (
@@ -66,7 +47,6 @@ around add_items => fun ($orig, $self, @items) {
     return $self->$orig($self->_inflate_items(@items));
 };
 
-
 around compile => fun ($orig, $self, $state) {
     return $state->markup_for($self, $self->base_style)
         ->apply($self->identity_populator_for('.list-container'))
@@ -76,13 +56,6 @@ around compile => fun ($orig, $self, $state) {
             (@{ $state->render($_)->to_events });
         } $self->items ]));
 };
-
-
-method _inflate_items (@items) {
-    return map {
-        is_ref($_, 'HASH') ? $self->make_item(%$_) : $_
-    } @items;
-}
 
 
 with qw(
