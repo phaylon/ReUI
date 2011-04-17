@@ -12,8 +12,6 @@ use aliased 'ReUI::Widget::List::Item';
 use syntax qw( function method );
 use namespace::autoclean;
 
-extends 'ReUI::Widget::Container';
-
 
 has item_class => (
     traits      => [ RelatedClass ],
@@ -47,18 +45,17 @@ around add_items => fun ($orig, $self, @items) {
     return $self->$orig($self->_inflate_items(@items));
 };
 
-around compile => fun ($orig, $self, $state) {
+method compile ($state) {
     return $state->markup_for($self, $self->base_style)
         ->apply($self->identity_populator_for('.list-container'))
         ->memoize
         ->select('.list-container')
-        ->replace_content(HTML::Zoom->from_events([ map {
-            (@{ $state->render($_)->to_events });
-        } $self->items ]));
-};
+        ->replace_content($self->compile_items($state));
+}
 
 
 with qw(
+    ReUI::Widget::API
     ReUI::Role::ElementClasses
 );
 
