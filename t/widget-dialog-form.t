@@ -93,6 +93,12 @@ test_processing('basic',
                             fun ($controls) {
                                 note('control set');
                                 $controls->attr_is(id => 'cs');
+                                $controls->into(
+                                    '//input[@id="visible-field"]',
+                                    fun ($input) {
+                                        $input->classes(qw( failure ));
+                                    },
+                                );
                             },
                             fun ($actions) {
                                 note('action set');
