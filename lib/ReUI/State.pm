@@ -402,8 +402,10 @@ method render ($value) {
     $value = $self->resolve($value);
     return $self->resolve_i18n($value)
         if is_string $value;
-    return $self->resolve_i18n(@$value)
-        if is_ref $value, 'ARRAY';
+    if (is_ref $value, 'ARRAY') {
+        my $real = $self->resolve_i18n(@$value);
+        return $real;
+    }
     return $self->render_widget($value)
         if is_blessed($value) and (
                does_role($value, 'ReUI::Widget::API')

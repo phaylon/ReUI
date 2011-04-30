@@ -35,23 +35,19 @@ method compile ($state) {
 method compile_widgets ($state, @widgets) {
     return HTML::Zoom->from_events([ map {
         (@{ $self->compile_widget($state, $_)->to_events })
-    } $self->widgets ]);
+    } @widgets ]);
 }
 
 method compile_widget ($state, $widget) {
-    return $state->render($widget);
+    return $widget->compile($state);
 }
+
+method event_propagation_targets { $self->widgets }
 
 with qw(
     ReUI::Widget::API
     ReUI::Widget::Container::API
+    ReUI::Role::EventHandling::Propagation
 );
-
-after fire => method ($event) { $self->propagate_event($event) };
-
-method propagate_event ($event) {
-    $_->fire($event)
-        for $self->widgets;
-}
 
 1;

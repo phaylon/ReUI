@@ -130,6 +130,7 @@ around compile => fun ($orig, $self, $state) {
 };
 
 with qw(
+    ReUI::Widget::API::Styled
     ReUI::Role::Identification::Internal
     ReUI::Role::ElementClasses
     ReUI::Role::ElementName
@@ -137,7 +138,7 @@ with qw(
 
 # separate so all attributes are found (name)
 with qw(
-    ReUI::Widget::Container::API::Namespaced
+    ReUI::Widget::API::Namespaced::EventPropagation
 );
 
 1;

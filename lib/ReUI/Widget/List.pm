@@ -38,7 +38,7 @@ has is_ordered => (
     isa         => Bool,
 );
 
-method base_style { $self->is_ordered ? 'ordered' : 'unordered' }
+method _build_style { $self->is_ordered ? 'ordered' : 'unordered' }
 
 
 around add_items => fun ($orig, $self, @items) {
@@ -46,17 +46,20 @@ around add_items => fun ($orig, $self, @items) {
 };
 
 method compile ($state) {
-    return $state->markup_for($self, $self->base_style)
+    return $state->markup_for($self)
         ->apply($self->identity_populator_for('.list-container'))
         ->memoize
         ->select('.list-container')
         ->replace_content($self->compile_items($state));
 }
 
+method event_propagation_targets { $self->items }
 
 with qw(
     ReUI::Widget::API
+    ReUI::Widget::API::Styled
     ReUI::Role::ElementClasses
+    ReUI::Role::EventHandling::Propagation
 );
 
 1;

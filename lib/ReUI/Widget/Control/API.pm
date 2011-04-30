@@ -23,6 +23,14 @@ method _build_label { join ' ', map ucfirst, map lc, split m{_}, $self->name }
 method has_label { defined $self->label }
 
 
+has comment => (
+    traits      => [ Lazy ],
+    is          => 'ro',
+);
+
+method _build_comment { '' }
+
+
 method validation_state_in ($state) {
     return(
         ( $state->isa('ReUI::State::Result') and $state->has_result )

@@ -1,6 +1,6 @@
 use strictures 1;
 
-package ReUI::Widget::Container::API::Namespaced;
+package ReUI::Widget::API::Namespaced::EventPropagation;
 use Moose::Role;
 
 use syntax qw( function method );

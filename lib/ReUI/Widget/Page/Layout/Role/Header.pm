@@ -3,6 +3,8 @@ use strictures 1;
 package ReUI::Widget::Page::Layout::Role::Header;
 use Moose::Role;
 
+use ReUI::Traits qw( Lazy RelatedClass );
+
 use aliased 'ReUI::Widget::Page::Header';
 
 use syntax qw( function method );

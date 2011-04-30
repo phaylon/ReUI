@@ -23,8 +23,11 @@ use Sub::Exporter -setup => {
         filter_flat_hashref
         file_by_object
         lineup
+        empty_stream
     )],
 };
+
+fun empty_stream { HTML::Zoom->from_events([]) }
 
 fun lineup ($str) {
     return  join ' ',

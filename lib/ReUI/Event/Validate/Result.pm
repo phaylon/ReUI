@@ -13,32 +13,6 @@ use syntax qw( function method );
 use namespace::autoclean;
 
 
-=attr control_errors
-
-Maps the namespace of a control to an array reference of errors.
-
-=method has_control_errors
-
-See L<ReUI::Event::Validate::Result::API/has_control_errors>.
-
-=method has_control_errors_for
-
-See L<ReUI::Event::Validate::Result::API/has_control_errors_for>.
-
-=method add_control_errors
-
-See L<ReUI::Event::Validate::Result::API/add_control_errors>.
-
-=method control_errors_for
-
-See L<ReUI::Event::Validate::Result::API/control_errors_for>.
-
-=method control_errors_as_data
-
-Returns an inflated hash reference containing the control errors.
-
-=cut
-
 has control_errors => (
     traits      => [ Hash, Lazy ],
     isa         => HashRef[ ArrayRef ],
@@ -69,24 +43,6 @@ method control_errors_as_data {
 }
 
 
-=attr global_errors
-
-Contains an array reference of global errors.
-
-=method has_global_errors
-
-See L<ReUI::Event::Validate::Result::API/has_global_errors>.
-
-=method add_global_errors
-
-See L<ReUI::Event::Validate::Result::API/add_global_errors>.
-
-=method global_errors
-
-See L<ReUI::Event::Validate::Result::API/global_errors>.
-
-=cut
-
 has global_errors => (
     traits      => [ Array, Lazy ],
     isa         => ArrayRef,
@@ -99,32 +55,6 @@ has global_errors => (
 
 method _build_global_errors { [] }
 
-
-=attr valid_values
-
-Maps control namespaces to valid values.
-
-=method has_valid_values
-
-See L<ReUI::Event::Validate::Result::API/has_valid_values>.
-
-=method has_valid_value_for
-
-See L<ReUI::Event::Validate::Result::API/has_valid_value_for>.
-
-=method valid_value_names
-
-See L<ReUI::Event::Validate::Result::API/valid_value_names>.
-
-=method valid_value_for
-
-See L<ReUI::Event::Validate::Result::API/valid_value_for>.
-
-=method valid_values_as_data
-
-Returns an inflated hash reference containing the valid values.
-
-=cut
 
 has valid_values => (
     traits      => [ Hash, Lazy ],
@@ -145,57 +75,18 @@ method valid_values_as_data {
 }
 
 
-=attr post_validation_constraints
-
-Contains validation subroutines to be evaluated after the individual controls
-have been validated.
-
-=method post_validation_constraints
-
-    ( CodeRef, ... ) = $object->post_validation_constraints;
-
-Returns all currently known constraints.
-
-=method add_post_validation_constraint
-
-    $object->add_post_validation_constraint( fun ($result) { ... } );
-
-Registers a new constraint to be run after the individual controls have been
-validated. The callback will have to register errors itself, the actual
-return value is discarded.
-
-=cut
-
 has post_validation_constraints => (
     traits      => [ Array, Lazy ],
     isa         => ArrayRef[ CodeRef ],
     handles     => {
         post_validation_constraints     => 'elements',
         add_post_validation_constraint  => 'push',
+        has_post_validation_constraints => 'count',
     },
 );
 
 method _build_post_validation_constraints { [] }
 
-
-=attr action
-
-Stores the action that is to be performed, if one was found.
-
-=method action
-
-    $object->action( $action_object );
-    Object = $object->action;
-
-Getter/setter for the action attribute.
-
-See L<ReUI::Event::Validate::Result::API/action>.
-
-=method has_action
-
-See L<ReUI::Event::Validate::Result::API/has_action>.
-
-=cut
 
 has action => (
     is          => 'rw',
@@ -205,33 +96,14 @@ has action => (
 method has_action { defined $self->action }
 
 
-=attr registered_controls
-
-Maps namespaces to controls that were registered during validation. This will
-usually not contain all control objects, but only those were communication
-between different widgets is necessary.
-
-=method registered_controls
-
-See L<ReUI::Event::Validate::Result::API/registered_controls>.
-
-=method control
-
-See L<ReUI::Event::Validate::Result::API/control>.
-
-=method register_control
-
-See L<ReUI::Event::Validate::Result::API/register_control>.
-
-=cut
-
 has registered_controls => (
     traits      => [ Hash, Lazy ],
     isa         => HashRef[ Does[ 'ReUI::Widget::Control::API' ] ],
     handles     => {
-        registered_controls => 'keys',
-        control             => 'get',
-        register_control    => 'set',
+        registered_controls     => 'keys',
+        control                 => 'get',
+        register_control        => 'set',
+        has_registered_controls => 'count',
     },
 );
 
@@ -240,6 +112,17 @@ method _build_registered_controls { {} }
 around control => fun ($orig, $self, @args) {
     return $self->$orig(join '.', @args);
 };
+
+
+method BUILD {
+    $self->$_ for qw(
+        has_registered_controls
+        has_post_validation_constraints
+        has_valid_values
+        has_global_errors
+        has_control_errors
+    );
+}
 
 
 =method has_errors

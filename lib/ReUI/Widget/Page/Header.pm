@@ -3,9 +3,10 @@ use strictures 1;
 package ReUI::Widget::Page::Header;
 use Moose;
 
-use ReUI::Types     qw( Renderable Uri Maybe Does Bool Undef );
-use ReUI::Traits    qw( Resolvable LazyRequire Lazy RelatedClass );
-use ReUI::Constants qw( :skinfiles );
+use ReUI::Types         qw( Renderable Uri Maybe Does Bool Undef );
+use ReUI::Traits        qw( Resolvable LazyRequire Lazy RelatedClass );
+use ReUI::Constants     qw( :skinfiles );
+use Params::Classify    qw( is_blessed );
 
 use syntax qw( function method );
 use namespace::autoclean;
@@ -109,9 +110,18 @@ method compile ($state) {
         );
 }
 
+method event_propagation_targets {
+    my $content = $self->content;
+    return(
+        $self->logo,
+        is_blessed($content) ? $content : (),
+    );
+}
+
 
 with qw(
     ReUI::Widget::API
+    ReUI::Role::EventHandling::Propagation
 );
 
 1;

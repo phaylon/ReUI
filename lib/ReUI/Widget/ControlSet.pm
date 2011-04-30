@@ -37,29 +37,60 @@ method compile ($state) {
         ->memoize
         ->select('.control-set-item')
         ->repeat([ map {
-            my $control = $_;
-            sub {
-                $_->select('.control-widgets')
-                  ->replace_content(
-                      $self->compile_controls_widget($state, $control)
-                  )
-                  ->select('.control-label')
-                  ->collect({
-                      passthrough   => 1,
-                      filter        => sub {
-                          $_->select('label')
-                            ->replace_content($control->label);
-                      },
-                  })
-                  ->select('.control-errors')
-                  ->replace([])
-            };
-        } $self->controls ])
+            $self->control_populator_for($state, $_);
+          } $self->controls ])
         ->memoize
+}
+
+method control_populator_for ($state, $control) {
+    my $class = $control->validation_state_in($state);
+    return sub {
+        $_->apply_if(defined($class), sub {
+                $_->select('.control-set-item')
+                  ->add_to_attribute(class => $class);
+            })
+          ->select('.control-widgets')
+          ->replace_content(
+                $self->compile_controls_widget($state, $control)
+            )
+          ->select('.control-label')
+          ->collect({
+                passthrough   => 1,
+                filter        => sub {
+                    $_->select('label')
+                      ->replace_content($control->label);
+                },
+            })
+          ->select('.control-errors')
+          ->replace($self->compile_control_errors($state, $control))
+          ->select('.control-comment')
+          ->replace_content($state->render($control->comment));
+    };
+}
+
+method compile_control_errors ($state, $control) {
+    return []
+        unless $state->isa('ReUI::State::Result')
+           and $state->has_result;
+    my @errors = $state->control_errors_for($control->name_in($state));
+    return []
+        unless @errors;
+    return $state->markup_for($self, 'errors')
+        ->select('.control-errors')
+        ->repeat([ map {
+            my $error = $_;
+            sub {
+                $_->select('.error')
+                  ->replace_content($state->render($error));
+            };
+          } @errors ])
+        ->memoize;
 }
 
 
 method _build_style { 'tabular' }
+
+method event_propagation_targets { $self->controls }
 
 
 # separate so all attributes are found (name)
@@ -68,10 +99,11 @@ with qw(
     ReUI::Role::ElementClasses
     ReUI::Widget::API
     ReUI::Widget::API::Styled
+    ReUI::Role::EventHandling::Propagation
 );
 
 with qw(
-    ReUI::Widget::API::Namespaced
+    ReUI::Widget::API::Namespaced::EventPropagation
 );
 
 1;
