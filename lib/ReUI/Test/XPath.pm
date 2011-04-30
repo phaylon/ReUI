@@ -12,8 +12,8 @@ use Lingua::EN::Numbers qw( num2en_ordinal );
 use syntax qw( function method );
 use namespace::clean;
 
-method content_is ($value) {
-    $self->is('.', $value, 'content');
+method content_is ($value, $title) {
+    $self->is('.', $value, $title || 'content');
 }
 
 method attr_is ($attr, $value) {
@@ -34,6 +34,8 @@ method attr_doesnt_contain ($attr, @values) {
             for @values;
     });
 }
+
+method classes (@classes) { $self->attr_contains(class => @classes) }
 
 method attr_contains ($attr, @values) {
     my %value = map { ($_, 1) } split m{ }, $self->attr_value($attr);

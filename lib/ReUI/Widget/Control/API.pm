@@ -13,6 +13,7 @@ use namespace::autoclean;
 
 requires qw( find_value compile_with_value validate );
 
+
 has label => (
     traits      => [ Lazy ],
     is          => 'ro',
@@ -59,6 +60,8 @@ method store_valid_value ($event, $value) {
     $event->valid_value_for($self->name_in($event), $value);
     return 1;
 }
+
+method is_input_control { 1 }
 
 with qw(
     ReUI::Widget::API

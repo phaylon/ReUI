@@ -3,10 +3,11 @@ use strictures 1;
 package ReUI::Widget::ControlSet;
 use Moose;
 
-use ReUI::Types  qw( ArrayRef Does );
-use ReUI::Traits qw( Array Prototyped );
-use ReUI::Util   qw( load_class );
-use Carp         qw( confess );
+use ReUI::Types     qw( ArrayRef Does );
+use ReUI::Traits    qw( Array Prototyped );
+use ReUI::Util      qw( load_class );
+use Carp            qw( confess );
+use List::AllUtils  qw( part );
 
 use syntax qw( function method );
 use namespace::autoclean;
@@ -32,13 +33,18 @@ method _make_control (%args) {
 
 
 method compile ($state) {
+    my ($hidden, $visible) = part {
+        $_->is_input_control ? 1 : 0;
+    } $self->controls;
     return $state->markup_for($self)
         ->apply($self->identity_populator_for('.control-set'))
         ->memoize
+        ->select('.hidden-controls')
+        ->replace($state->render_widgets(@$hidden))
         ->select('.control-set-item')
-        ->repeat([ map {
-            $self->control_populator_for($state, $_);
-          } $self->controls ])
+        ->repeat([
+            map { $self->control_populator_for($state, $_) } @$visible,
+        ])
         ->memoize
 }
 

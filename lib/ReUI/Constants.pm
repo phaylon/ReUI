@@ -19,12 +19,13 @@ BEGIN {
         } @to;
     };
     %I18N = $prepare->('I18N',
-        [ VALUE_INVALID     => 'reui.control.invalid' ],
-        [ VALUE_MISSING     => 'reui.control.missing' ],
-        [ PASSWORD_MISMATCH => 'reui.control.password.mismatch' ],
+        [ VALUE_INVALID         => 'reui.control.invalid' ],
+        [ VALUE_MISSING         => 'reui.control.missing' ],
+        [ VALUE_HIDDEN_MISSING  => 'reui.control.hidden.missing' ],
+        [ PASSWORD_MISMATCH     => 'reui.control.password.mismatch' ],
     );
     %SkinFile = $prepare->('SKINFILE',
-        [ PAGE_HEADER_LOGO  => \[qw( page header logo.png )] ],
+        [ PAGE_HEADER_LOGO      => \[qw( page header logo.png )] ],
     );
     %Constant = (%I18N, %SkinFile);
 };

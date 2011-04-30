@@ -38,6 +38,9 @@ our %Lexicon = flatten_hashref({
         control => {
             invalid     => 'Invalid value for [i18n,_1]',
             missing     => 'Value is missing',
+            hidden      => {
+                missing     => 'Missing value for [i18n,_1]',
+            },
             password    => {
                 mismatch    => 'Password is not the same as in [i18n,_2]',
             },

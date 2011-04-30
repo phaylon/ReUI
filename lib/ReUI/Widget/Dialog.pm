@@ -26,6 +26,7 @@ has content => (
 
 method _build_content_class { 'ReUI::Widget::Container' }
 method _build_content       { $self->make_content }
+method content_arguments    { () }
 
 
 has header_class => (

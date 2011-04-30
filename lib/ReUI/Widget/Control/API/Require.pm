@@ -23,13 +23,22 @@ around validate => fun ($orig, $self, $event) {
     }
     else {
         if ($self->required) {
-            $event->add_control_errors_for(
+            $self->register_requirement_error(
+                $event,
                 $self->name_in($event),
-                [I18N_VALUE_MISSING, $self->label],
+                $self->requirement_error_for($event),
             );
         }
     }
     return undef;
 };
+
+method requirement_error_for ($event) {
+    return [I18N_VALUE_MISSING, $self->label],
+}
+
+method register_requirement_error ($event, $name, @errors) {
+    $event->add_control_errors_for($name, @errors);
+}
 
 1;

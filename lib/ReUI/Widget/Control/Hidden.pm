@@ -29,8 +29,19 @@ around register_validation_error => fun ($orig, $self, $ev, $name, @err) {
     return $self->$orig($ev, $name, $error);
 };
 
+around register_requirement_error => fun ($orig, $self, $ev, $name, @err) {
+    $ev->add_global_errors(@err);
+    return $self->$orig($ev, $name, @err);
+};
+
 around render_value => fun ($orig, $self, $state, $value) {
     return $JSON->encode($self->$orig($state, $value));
 };
+
+method requirement_error_for ($event) {
+    return [I18N_VALUE_HIDDEN_MISSING, $self->label],
+}
+
+method is_input_control { 0 }
 
 1;

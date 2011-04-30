@@ -1,14 +1,8 @@
 
 
 
-    · allow style to take a Path::Class::File object for direct template
-      specification in applications
-
     · add resolvable on_success/on_failure callback attributes
       to action objects.
-
-    · clean up namespacing, with a separate widget role for namespace
-      descension. specialized objects will react to this role.
 
     · allow optional namespacing of action sets.
 
@@ -69,37 +63,6 @@
             ],
         );
 
-    · dialogs
-
-        my $dialog = Dialog->new(
-            title       => 'Test Dialog',
-            messages    => [
-                Message->new(
-                    category    => 'notice',
-                    widgets     => [ ... ],
-                ),
-            ],
-            actions     => [
-                Submit->new(name => 'ok'),
-                Submit->new(name => 'cancel'),
-            ],
-            widgets     => [
-                Value->new(name => 'new_name'),
-            ],
-        );
-
-    · control sets
-
-        my $fields = ControlSet->new(
-            name        => 'profile',
-            style       => 'tabular',   # control/set/tabular.base.html
-            error_style => 'list',      # control/set/tabular.error.list.html
-            controls    => [
-                Value->new(name => 'username'),
-                Value->new(name => 'email'),
-            ],
-        );
-
     · dynamic containers
 
         my $dyn = Dynamic->new(
@@ -118,8 +81,6 @@
                 Intro::I18N
                 Intro::Skins
                 Intro::Forms
-
-    · make base styles configurable in all widgets via style => 'foo'
 
     · javascript
 

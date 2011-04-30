@@ -39,6 +39,9 @@ our %Lexicon = flatten_hashref({
         control => {
             invalid     => 'Ungültiger Wert für [i18n,_1]',
             missing     => 'Fehlende Eingabe',
+            hidden      => {
+                missing     => 'Fehlender Wert für [i18n,_1]',
+            },
             password    => {
                 mismatch =>
                     'Passwort ist nicht mit dem in [i18n,_2] identisch',
