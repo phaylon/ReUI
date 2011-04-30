@@ -11,7 +11,7 @@ use HTML::Zoom;
 use syntax qw( function method );
 use namespace::autoclean;
 
-has make_via        => (is => 'ro', isa => Str, required => 1);
+has make_via        => (is => 'ro', isa => Str);
 has proto_clearer   => (is => 'ro', isa => Str, required => 1);
 has proto_getter    => (is => 'ro', isa => Str, required => 1);
 has proto_inflate   => (is => 'ro', isa => Str, required => 1);
@@ -53,9 +53,15 @@ method _install_prototype_attribute {
 }
 
 method _install_inflate_method {
+    my $name    = $self->name;
     my $class   = $self->associated_class;
     my $inflate = $self->proto_inflate;
     my $maker   = $self->make_via;
+    $maker = fun (%args) {
+        confess qq{Prototypes for '$name' require a 'class' argument}
+            unless exists $args{class};
+        return load_class($args{class})->new(%args);
+    } unless defined $maker;
     $class->add_method($inflate, method (@values) {
         return map {
             is_ref($_, 'HASH')

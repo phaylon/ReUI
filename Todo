@@ -1,5 +1,9 @@
 
 
+
+    · allow style to take a Path::Class::File object for direct template
+      specification in applications
+
     · add resolvable on_success/on_failure callback attributes
       to action objects.
 

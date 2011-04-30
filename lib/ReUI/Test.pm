@@ -68,7 +68,7 @@ fun test_require_call ($title, $count) {
 
 fun grouped ($title, $code) {
     (my $descr, $title) = ref($title) ? @$title : ($title, $title);
-    if ($ENV{REUI_TEST_FLAT}) {
+    if ($ENV{REUI_TEST_FLAT} or $ENV{HARNESS_ACTIVE}) {
         Test::More::note(sprintf '%s%s',
             $LEVEL ? sprintf(' %s ', '*' x $LEVEL) : '',
             $descr,
@@ -133,7 +133,7 @@ fun test_markup ($test) {
         warn "MARKUP:\n$body\n"
             if $ENV{REUI_MARKUP};
         require ReUI::Test::XPath;
-        my $xpath = ReUI::Test::XPath->new(xml => $body, is_html => 1);
+        my $xpath = ReUI::Test::XPath->new(xml => $body);
         grouped('markup', sub {
             $test->($xpath);
         });

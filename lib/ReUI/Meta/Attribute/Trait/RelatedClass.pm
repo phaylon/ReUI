@@ -5,7 +5,7 @@ use strictures 1;
 package ReUI::Meta::Attribute::Trait::RelatedClass;
 use Moose::Role;
 
-use ReUI::Types qw( Maybe NonEmptySimpleStr HashRef );
+use ReUI::Types qw( Maybe NonEmptySimpleStr HashRef StrMap );
 use ReUI::Util  qw( load_class );
 
 use syntax qw( function method );
@@ -29,6 +29,12 @@ has build_via => (
     required    => 1,
 );
 
+has proxy => (
+    is          => 'ro',
+    isa         => StrMap,
+    coerce      => 1,
+);
+
 before _process_options => method ($class: $name, $options) {
     ( my $type = $name ) =~ s/^(.+)_class$/$1/x;
     %$options = (
@@ -36,6 +42,7 @@ before _process_options => method ($class: $name, $options) {
         constructor         => "make_${type}",
         argument_builder    => "${type}_arguments",
         build_via           => 'new',
+        proxy               => {},
         %$options,
     );
 };
@@ -45,7 +52,9 @@ after install_accessors => method {
     my $arg_build   = $self->argument_builder;
     my $via         = $self->build_via;
     my $add_args    = "additional_${arg_build}";
-    $self->associated_class->add_attribute(
+    my $proxy       = $self->proxy;
+    my $class       = $self->associated_class;
+    $class->add_attribute(
         $add_args,
         traits      => [qw( Hash )],
         isa         => HashRef,
@@ -55,7 +64,7 @@ after install_accessors => method {
             "has_${add_args}"   => 'count',
         },
     );
-    $self->associated_class->add_method(
+    $class->add_method(
         $self->constructor, method (%args) {
             my $args_from = $self->can($arg_build);
             my $related   =
@@ -67,10 +76,25 @@ after install_accessors => method {
             return load_class($related)->$via(
                 $args_from ? ($self->$args_from) : (),
                 %args,
+                (map {
+                    my $pr_name = $_;
+                    ( $self->can("_has_proxied_${pr_name}")->($self)
+                        ? ( $pr_name,
+                            $self->can("_proxied_${pr_name}")->($self),
+                        ) : ()
+                    );
+                } keys %$proxy),
                 $self->$add_args,
             );
         },
     ) if defined $self->constructor;
+    for my $proxied_attr (keys %$proxy) {
+        $class->add_attribute("_proxied_${proxied_attr}",
+            is          => 'ro',
+            init_arg    => $proxied_attr,
+            predicate   => "_has_proxied_${proxied_attr}",
+        );
+    }
 };
 
 with qw(

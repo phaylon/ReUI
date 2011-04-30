@@ -34,6 +34,8 @@ use MooseX::Types -declare => [qw(
     SkinMap
     _SkinProto
     Renderable
+    StrMap
+    StrList
 )];
 
 my $rxNamespaceStr = qr{
@@ -47,6 +49,12 @@ my $rxNamespaceStr = qr{
     )?
     \Z
 }x;
+
+subtype StrList, as ArrayRef[ Str ];
+
+subtype StrMap, as HashRef[ Str ];
+
+coerce StrMap, from StrList, via { +{ map { (($_) x 2) } @$_ } };
 
 subtype _SkinProto,
     as HashRef,
