@@ -70,8 +70,10 @@ method markup_for ($object, $name) {
             ? $object->style
             : DEFAULT_MARKUP
         unless defined $name;
-    my $file = $self->locate_markup_file($object, $name)
-        or confess "No markup file found for $object";
+    (my $file = ref($name)
+        ? $name
+        : $self->locate_markup_file($object, $name)
+    ) or confess "No markup file found for $object";
     return HTML::Zoom->from_file($file);
 }
 
