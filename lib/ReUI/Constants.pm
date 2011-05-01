@@ -25,7 +25,7 @@ BEGIN {
         [ PASSWORD_MISMATCH     => 'reui.control.password.mismatch' ],
     );
     %SkinFile = $prepare->('SKINFILE',
-        [ PAGE_HEADER_LOGO      => \[qw( page header logo.png )] ],
+        [ MESSAGE_ICON_PATH     => \[qw( message icon )] ],
     );
     %Constant = (%I18N, %SkinFile);
 };

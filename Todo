@@ -53,16 +53,6 @@
             ],
         );
 
-    · messages
-
-        my $message = Message->new(
-            title       => 'Changes saved',
-            category    => 'notice',
-            widgets     => [
-                'Some Message',
-            ],
-        );
-
     · dynamic containers
 
         my $dyn = Dynamic->new(

@@ -12,6 +12,7 @@ use ReUI::Types         qw(
 use Carp                qw( confess );
 use Params::Classify    qw( is_blessed is_ref is_string );
 use Moose::Util         qw( does_role );
+use Path::Class         qw( file );
 
 use aliased 'ReUI::Reactor';
 use aliased 'ReUI::Response::Markup';
@@ -324,11 +325,23 @@ method uri_for_skin (@args) {
     return $self->resolve($self->skin_uri_callback, @args);
 }
 
+method uri_for_current_skin (@path) {
+    return undef
+        unless $self->has_current_skin;
+    $path[-1] = join('.', @{ $path[-1] })
+        if is_ref($path[-1], 'ARRAY');
+    return undef
+        unless $self->locate_skin_file($self->current_skin, file(@path));
+    return $self->uri_for_skin($self->current_skin, @path);
+}
+
 
 has current_skin => (
     is          => 'rw',
     isa         => Str,
 );
+
+method has_current_skin { defined $self->current_skin }
 
 
 =method with_language
