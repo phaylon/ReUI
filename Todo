@@ -1,9 +1,6 @@
 
 
 
-    · add resolvable on_success/on_failure callback attributes
-      to action objects.
-
     · allow optional namespacing of action sets.
 
     · switchable i18n message for easier defaults

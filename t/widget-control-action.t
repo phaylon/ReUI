@@ -13,6 +13,7 @@ my $uri = URI->new('http://example.com/');
 test_processing('basic',
     {   widget => fun ($state) {
             my $test_cb = test_require_call('success callback');
+            my $arg_cb  = test_require_call('per-widget callback');
             return Form->new(
                 id                  => 'test_form',
                 action              => $uri,
@@ -20,7 +21,18 @@ test_processing('basic',
                 ignore_indicator    => 1,
                 widgets             => [
                     $state->on_success(
-                        Action->new(id => 'test_action'),
+                        Action->new(
+                            id          => 'test_action',
+                            on_success  => fun ($result) {
+                                $arg_cb->();
+                                is  $result->{test_action},
+                                    'Test Action',
+                                    'correct result';
+                                is  $_{test_var},
+                                    23,
+                                    'state variables available';
+                            },
+                        ),
                         fun ($result) {
                             $test_cb->();
                             is  $result->{test_action},
@@ -30,6 +42,9 @@ test_processing('basic',
                     ),
                 ],
             );
+        },
+        variables => {
+            test_var    => 23,
         },
         request => {
             method      => 'POST',

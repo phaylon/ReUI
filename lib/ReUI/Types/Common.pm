@@ -37,6 +37,7 @@ use MooseX::Types -declare => [qw(
     StrMap
     StrList
     MessageType
+    CodeRefList
 )];
 
 my $rxNamespaceStr = qr{
@@ -50,6 +51,10 @@ my $rxNamespaceStr = qr{
     )?
     \Z
 }x;
+
+subtype CodeRefList, as ArrayRef[ CodeRef ];
+
+coerce CodeRefList, from CodeRef, via { [$_] };
 
 enum MessageType, [qw(
     notice
