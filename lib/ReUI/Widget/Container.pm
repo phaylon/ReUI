@@ -24,6 +24,7 @@ has widgets => (
         add         => 'push',
         is_empty    => 'is_empty',
         widget      => 'get',
+        has_widgets => 'count',
     },
 );
 

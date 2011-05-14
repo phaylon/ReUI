@@ -4,7 +4,7 @@ use strictures 1;
 
 package ReUI::Types::Common;
 
-use ReUI::Util                      qw( human_join_with );
+use ReUI::Util                      qw( human_join_with load_class );
 use Moose::Util                     qw( does_role );
 use Moose::Util::TypeConstraints    qw( register_type_constraint );
 use MooseX::Types::Path::Class      qw( :all );
@@ -38,6 +38,8 @@ use MooseX::Types -declare => [qw(
     StrList
     MessageType
     CodeRefList
+    Container
+    Proto
 )];
 
 my $rxNamespaceStr = qr{
@@ -51,6 +53,14 @@ my $rxNamespaceStr = qr{
     )?
     \Z
 }x;
+
+fun load_proto ($proto) {
+    return $proto
+        if is_blessed $proto;
+    my %args  = %$proto;
+    my $class = delete $args{class};
+    return load_class($class)->new(%args);
+}
 
 subtype CodeRefList, as ArrayRef[ CodeRef ];
 
@@ -155,6 +165,27 @@ coerce DirList,
 
 subtype Renderable,
     as Str | I18N | Does['ReUI::Widget::API'];
+
+subtype Proto, as Dict[ class => NonEmptySimpleStr, slurpy Any ];
+
+subtype Container, as class_type('ReUI::Widget::Container');
+
+coerce Container,
+    from ArrayRef[ Proto | Does['ReUI::Widget::API'] ], via {
+        return load_class('ReUI::Widget::Container')->new(
+            widgets => [ map { load_proto($_) } @$_ ],
+        );
+    },
+    from Proto, via {
+        return load_class('ReUI::Widget::Container')->new(
+            widgets => [ load_proto($_) ],
+        );
+    },
+    from Does['ReUI::Widget::API'], via {
+        return load_class('ReUI::Widget::Container')->new(
+            widgets => [ $_ ],
+        );
+    };
 
 1;
 

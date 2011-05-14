@@ -118,5 +118,4 @@ test_processing('limit by trailing',
     ),
 );
 
-
 done_testing;
