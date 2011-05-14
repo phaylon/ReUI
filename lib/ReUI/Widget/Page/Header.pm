@@ -111,11 +111,8 @@ method compile ($state) {
 }
 
 method event_propagation_targets {
-    my $content = $self->content;
-    return(
-        $self->logo,
-        is_blessed($content) ? $content : (),
-    );
+    return map { (is_blessed($_) ? ($_) : ()) }
+        $self->logo, $self->content;
 }
 
 
@@ -123,5 +120,7 @@ with qw(
     ReUI::Widget::API
     ReUI::Role::EventHandling::Propagation
 );
+
+__PACKAGE__->meta->make_immutable;
 
 1;

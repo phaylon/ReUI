@@ -58,4 +58,6 @@ around validate => fun ($orig, $self, $event) {
     return $value;
 };
 
+__PACKAGE__->meta->make_immutable;
+
 1;

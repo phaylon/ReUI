@@ -57,6 +57,8 @@ with qw(
     ReUI::Event::Validate::Result::API
 );
 
+__PACKAGE__->meta->make_immutable;
+
 1;
 
 __END__

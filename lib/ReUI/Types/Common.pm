@@ -122,10 +122,17 @@ enum RequestMethod, @RequestMethods;
 subtype _LooseRequestMethod, as Str, where { RequestMethod->check(uc) };
 coerce RequestMethod, from _LooseRequestMethod, via { uc };
 
-subtype Does, as Parameterizable[ NonEmptySimpleStr ],
+subtype Does, as Parameterizable[ Object, NonEmptySimpleStr ],
     where {
         my ($object, $role) = @_;
-        is_blessed($object) and does_role($object, $role);
+#        warn "CHECK '$object' FOR '$role'";
+        return undef
+            unless is_blessed($object);
+#        warn "IS BLESSED";
+        return undef
+            unless does_role($object, $role);
+#        warn "DOES ROLE";
+        return 1;
     };
 
 subtype InstanceOf, as Parameterizable[ Object, NonEmptySimpleStr ],

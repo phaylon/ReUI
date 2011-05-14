@@ -53,10 +53,10 @@ after install_accessors => method {
     my $name = $self->name;
     $self->associated_class->add_method(
         $self->resolver,
-        method ($state) {
+        method ($state, @args) {
             my $attr  = $self->meta->find_attribute_by_name($name);
             my $value = $attr->get_value($self);
-            $value = $state->resolve($value);
+            $value = $state->resolve($value, @args);
             confess q{Cannot resolve value to code reference}
                 if is_ref $value, 'CODE';
             if (my $tc = $attr->original_type_constraint) {

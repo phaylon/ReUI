@@ -3,7 +3,7 @@ use strictures 1;
 package ReUI::Meta::Attribute::Trait::Prototyped;
 use Moose::Role;
 
-use MooseX::Types::Moose    qw( ArrayRef HashRef Str Maybe );
+use MooseX::Types::Moose    qw( ArrayRef HashRef Str Maybe Bool );
 use Params::Classify        qw( is_ref );
 use Carp                    qw( confess );
 use HTML::Zoom;
@@ -17,6 +17,7 @@ has proto_getter    => (is => 'ro', isa => Str, required => 1);
 has proto_inflate   => (is => 'ro', isa => Str, required => 1);
 has compile_all     => (is => 'ro', isa => Maybe[ Str ], required => 1);
 has compile_single  => (is => 'ro', isa => Maybe[ Str ], required => 1);
+has compile         => (is => 'ro', isa => Bool);
 
 before _process_options => method ($class: $name, $options) {
     %$options = (
@@ -24,6 +25,7 @@ before _process_options => method ($class: $name, $options) {
         proto_clearer   => "_clear_prototyped_${name}",
         proto_getter    => "_prototyped_${name}",
         proto_inflate   => "_inflate_${name}",
+        compile         => 1,
         compile_all     => "compile_${name}",
         compile_single  => "compile_${name}_widget",
         %$options,
@@ -114,7 +116,8 @@ after install_accessors => method {
     $self->_install_prototype_attribute;
     $self->_install_inflate_method;
     $self->_install_real_builder_method;
-    $self->_install_compilation_methods;
+    $self->_install_compilation_methods
+        if $self->compile;
 };
 
 with qw(

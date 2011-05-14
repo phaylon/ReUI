@@ -44,4 +44,6 @@ method requirement_error_for ($event) {
 
 method is_input_control { 0 }
 
+__PACKAGE__->meta->make_immutable;
+
 1;

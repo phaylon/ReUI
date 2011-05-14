@@ -62,4 +62,6 @@ with qw(
     ReUI::Role::EventHandling::Propagation
 );
 
+__PACKAGE__->meta->make_immutable;
+
 1;

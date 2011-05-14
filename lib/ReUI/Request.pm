@@ -34,4 +34,6 @@ with qw(
     ReUI::Request::API
 );
 
+__PACKAGE__->meta->make_immutable;
+
 1;

@@ -9,6 +9,7 @@ use Scalar::Util    qw( blessed );
 use Carp            qw( confess );
 use File::ShareDir  qw( module_file );
 use Try::Tiny;
+use List::AllUtils  qw( max min );
 
 use syntax qw( function );
 use namespace::clean;
@@ -24,8 +25,18 @@ use Sub::Exporter -setup => {
         file_by_object
         lineup
         empty_stream
+        leading
+        trailing
     )],
 };
+
+fun leading ($count, @items) {
+    return @items[0 .. min($#items, $count-1)];
+}
+
+fun trailing ($count, @items) {
+    return @items[max(0, $#items + 1 - $count) .. $#items];
+}
 
 fun empty_stream { HTML::Zoom->from_events([]) }
 

@@ -105,4 +105,6 @@ with qw(
     ReUI::View::API
 );
 
+__PACKAGE__->meta->make_immutable;
+
 1;

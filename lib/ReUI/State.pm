@@ -13,6 +13,7 @@ use Carp                qw( confess );
 use Params::Classify    qw( is_blessed is_ref is_string );
 use Moose::Util         qw( does_role );
 use Path::Class         qw( file );
+use Scalar::Util        qw( weaken );
 
 use aliased 'ReUI::Reactor';
 use aliased 'ReUI::Response::Markup';
@@ -195,6 +196,19 @@ has variables => (
 
 method _build_variables { {} }
 
+method add_weak_variables (%args) {
+    $self->add_variables(%args);
+    weaken($self->variables->{ $_ })
+        for keys %args;
+    return 1;
+}
+
+method default_variables (%args) {
+    $self->variables->{ $_ } = $args{ $_ }
+        for grep { not defined $self->variables->{ $_ } } keys %args;
+    return 1;
+}
+
 
 =attr validation
 
@@ -315,7 +329,7 @@ method _build_i18n {
 
 has skin_uri_callback => (
     traits      => [ LazyRequire ],
-    is          => 'ro',
+    is          => 'rw',
     isa         => CodeRef,
 );
 
@@ -487,6 +501,8 @@ container afterwards.
 =cut
 
 after fire => method ($event) { $self->root->fire($event) };
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

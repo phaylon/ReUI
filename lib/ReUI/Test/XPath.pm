@@ -35,7 +35,13 @@ method attr_doesnt_contain ($attr, @values) {
     });
 }
 
-method classes (@classes) { $self->attr_contains(class => @classes) }
+method classes (@classes) {
+    $self->attr_contains(class => @classes);
+}
+
+method not_classes (@classes) {
+    $self->attr_doesnt_contain(class => @classes);
+}
 
 method attr_contains ($attr, @values) {
     my %value = map { ($_, 1) } split m{ }, $self->attr_value($attr);

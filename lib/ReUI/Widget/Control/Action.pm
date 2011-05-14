@@ -99,4 +99,6 @@ before store_valid_value => method ($event, $value) {
     $event->action($self);
 };
 
+__PACKAGE__->meta->make_immutable;
+
 1;

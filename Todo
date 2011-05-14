@@ -39,8 +39,6 @@
 
     · refactor type system, grown too organically
 
-    · turn result state class into a trait
-
     · sections
 
         my $section = Section->new(
@@ -48,14 +46,6 @@
             widgets => [
                 SomeContent->new,
             ],
-        );
-
-    · dynamic containers
-
-        my $dyn = Dynamic->new(
-            build => sub {
-                ...
-            },
         );
 
     · documentation
@@ -113,14 +103,6 @@
     · add current uri to request expectations
 
     · file uploads
-
-    · redirect response via exception during success callbacks that will
-      be collected and if $count > 1 and the targets aren't the same, an
-      error will be thrown.
-
-    · per-widget variables
-
-        my $hash_ref = $state->variables_for($widget);
 
     · extended distributions
 

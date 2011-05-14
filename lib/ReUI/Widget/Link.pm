@@ -45,4 +45,6 @@ around anchor_attributes => fun ($orig, $self, $state) {
     name  => $self->resolve_name($state),
 };
 
+__PACKAGE__->meta->make_immutable;
+
 1;

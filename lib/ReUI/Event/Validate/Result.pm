@@ -193,6 +193,8 @@ with qw(
     ReUI::Event::API::Dispatch
 );
 
+__PACKAGE__->meta->make_immutable;
+
 1;
 
 __END__

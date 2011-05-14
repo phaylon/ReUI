@@ -141,4 +141,6 @@ with qw(
     ReUI::Widget::API::Namespaced::EventPropagation
 );
 
+__PACKAGE__->meta->make_immutable;
+
 1;

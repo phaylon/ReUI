@@ -31,4 +31,6 @@ with qw(
     ReUI::Widget::API
 );
 
+__PACKAGE__->meta->make_immutable;
+
 1;

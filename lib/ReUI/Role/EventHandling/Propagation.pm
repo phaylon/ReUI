@@ -11,8 +11,8 @@ requires qw( event_propagation_targets );
 after fire => method ($event) { $self->propagate_event($event) };
 
 method propagate_event ($event) {
-    $_->fire($event)
-        for $self->event_propagation_targets($event);
+    my @targets = $self->event_propagation_targets($event);
+    $_->fire($event) for @targets;
 }
 
 1;
